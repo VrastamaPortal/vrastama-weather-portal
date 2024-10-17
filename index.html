@@ -563,12 +563,12 @@
       }
     }
 
-    // Language Switching
+        // Language Switching
     function switchLanguage(language) {
       currentLanguage = language;
 
       if (language === 'en') {
-        document.getElementById('header-title').textContent = 'Vrastama Portal';
+        document.getElementById('header-title').textContent = 'Vrastama Weather Portal';
         document.getElementById('feels-like-label').textContent = 'Feels Like: ';
         document.getElementById('humidity-label').textContent = 'Humidity: ';
         document.getElementById('wind-speed-label').textContent = 'Wind Speed: ';
@@ -576,12 +576,12 @@
         document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Contact Community';
         // Update notifications and contact form labels if needed
       } else if (language === 'gr') {
-        document.getElementById('header-title').textContent = 'Πύλη Βραστάμα';
-        document.getElementById('feels-like-label').textContent = 'Αισθάνεται σαν: ';
+        document.getElementById('header-title').textContent = 'Πύλη Καιρού Βράσταμα';
+        document.getElementById('feels-like-label').textContent = 'Άισθηση σαν: ';
         document.getElementById('humidity-label').textContent = 'Υγρασία: ';
         document.getElementById('wind-speed-label').textContent = 'Ταχύτητα ανέμου: ';
         document.querySelector('.collapsible:nth-of-type(2)').textContent = 'Ειδοποιήσεις';
-        document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Επικοινωνία Κοινότητας';
+        document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Επικοινωνία με την Κοινότητα';
       }
 
       // Refresh weather data in the selected language
