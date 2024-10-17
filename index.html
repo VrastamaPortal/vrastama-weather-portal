@@ -12,13 +12,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
   <style>
-    /* Basic Reset */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Arial', sans-serif;
       background: url('vrastama3.jpg') center center fixed;
@@ -301,38 +294,6 @@
       }
       100% {
         transform: translateX(100%);
-      }
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .weather-details {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .right-col {
-        padding-left: 0;
-        margin-top: 15px;
-      }
-
-      .forecast-block {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .forecast-day {
-        width: 80%;
-      }
-
-      #clock {
-        position: static;
-        margin-top: 10px;
-      }
-
-      #language-switch {
-        position: static;
-        margin-bottom: 10px;
       }
     }
 
@@ -636,7 +597,6 @@
         document.getElementById('wind-speed-label').textContent = 'Ταχύτητα ανέμου: ';
         document.querySelector('.collapsible:nth-of-type(2)').textContent = 'Ειδοποιήσεις';
         document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Επικοινωνία Κοινότητας';
-        // Update notifications and contact form labels if needed
       }
 
       // Refresh weather data in the selected language
