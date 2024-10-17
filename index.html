@@ -209,15 +209,13 @@
       border-radius: 0 0 10px 10px;
       width: 100%;
       max-width: 800px;
+      text-align: center;
     }
 
-    .content form {
-      padding: 20px;
-    }
-
-    .content ul {
-      padding-left: 20px;
-      margin: 20px 0;
+    .content img {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 10px;
     }
 
     /* Interactive Map */
@@ -348,28 +346,15 @@
     <!-- Notifications Block (Collapsible) -->
     <button class="collapsible">Notifications</button>
     <div class="content">
-      <ul id="notifications-list">
-        <li>Upcoming Village Festival on October 15th</li>
-        <li>Village Clean-up Event on November 1st</li>
-        <li>Important Road Closure Announcement</li>
-      </ul>
+      <img src="under_construction_icon.png" alt="Under Construction Icon">
+      <p>Under Construction</p>
     </div>
 
     <!-- Contact Form (Collapsible) -->
     <button class="collapsible">Contact Community</button>
     <div class="content">
-      <form id="contact-form">
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">Your Email:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="message">Your Message:</label>
-        <textarea id="message" name="message" rows="5" required></textarea>
-
-        <input type="submit" value="Send Message">
-      </form>
+      <img src="under_construction_icon.png" alt="Under Construction Icon">
+      <p>Under Construction</p>
     </div>
   </div>
 
@@ -389,15 +374,15 @@
     const apiKey = 'a14b6acd056531b654e38565bfea7ebe';  // Replace with your OpenWeather API key
     let currentLanguage = 'en';  // Track the current language
 
-    // Initialize the Leaflet map with Vrastama's location
-    const map = L.map('map').setView([40.4715, 23.5312], 14); // Adjust zoom level as needed
+    // Initialize the Leaflet map with new coordinates (40.3715068, 23.5356830)
+    const map = L.map('map').setView([40.3715068, 23.5356830], 14); // New coordinates
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Add marker for Vrastama
-    const marker = L.marker([40.4715, 23.5312]).addTo(map)
+    // Add marker for the new location
+    const marker = L.marker([40.3715068, 23.5356830]).addTo(map)
       .bindPopup('Βράσταμα Village Center')
       .openPopup();
 
@@ -611,21 +596,6 @@
       const seconds = String(now.getSeconds()).padStart(2, '0');
       document.getElementById('clock').textContent = `Local Time: ${hours}:${minutes}:${seconds}`;
     }
-
-    // Handle Contact Form Submission
-    document.getElementById('contact-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const message = document.getElementById('message').value.trim();
-
-      if (name && email && message) {
-        alert(`${currentLanguage === 'en' ? 'Message sent successfully!' : 'Το μήνυμα εστάλη με επιτυχία!'}`);
-        this.reset();
-      } else {
-        alert(`${currentLanguage === 'en' ? 'Please fill in all fields.' : 'Παρακαλώ συμπληρώστε όλα τα πεδία.'}`);
-      }
-    });
 
     // Initialize
     window.onload = function() {
