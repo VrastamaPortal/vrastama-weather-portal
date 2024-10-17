@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vrastama Portal</title>
+  
+  <!-- Favicon for Page Tab -->
+  <link rel="icon" href="vrastama_icon.png" type="image/png">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <style>
+    /* Basic Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: url('vrastama3.jpg') center center fixed;
+      background-size: cover;
+      transition: background 0.5s, filter 0.5s;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background-color: rgba(34, 49, 63, 0.8);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #fff;
+    }
+
+    /* Local Time Clock */
+    #clock {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    /* Language Switcher */
+    #language-switch {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #language-switch button {
+      background-color: rgba(245, 245, 245, 0.9);
+      color: black;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #language-switch button:hover {
+      background-color: rgba(220, 220, 220, 1);
+    }
+
+    /* Main Container */
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Weather Container */
+    .weather-container {
+      background-color: rgba(245, 245, 245, 0.5); /* 50% transparency */
+      color: #333;
+      width: 100%;
+      max-width: 800px;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .weather-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .icon-block {
+      background-color: rgba(34, 49, 63, 1); /* Non-transparent block for icon */
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .weather-icon {
+      width: 60px;
+      height: 60px;
+    }
+
+    .temp {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .weather-condition {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .data-point {
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+
+    /* Forecast Block */
+    .forecast-block {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .forecast-day {
+      background-color: rgba(200, 200, 200, 0.8);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      flex: 1;
+      min-width: 120px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .forecast-day h4 {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+
+    .forecast-day img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 5px;
+    }
+
+    /* Collapsible Sections */
+    .collapsible {
+      background-color: rgba(34, 49, 63, 0.8);
+      color: white;
+      cursor: pointer;
+      padding: 15px;
+      width: 100%;
+      max-width: 800px;
+      border: none;
+      text-align: left;
+      outline: none;
+      font-size: 1.3rem;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s;
+    }
+
+    .collapsible::after {
+      content: '▼'; /* Down arrow for collapsed */
+      font-size: 1.5rem;
+      color: white;
+      transition: transform 0.3s;
+    }
+
+    .collapsible.active::after {
+      content: '▲'; /* Up arrow for expanded */
+      transform: rotate(180deg);
+    }
+
+    .collapsible:hover, .collapsible.active {
+      background-color: rgba(20, 20, 20, 1);
+    }
+
+    .content {
+      padding: 0 18px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background-color: rgba(245, 245, 245, 0.9);
+      border-radius: 0 0 10px 10px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .content form {
+      padding: 20px;
+    }
+
+    .content ul {
+      padding-left: 20px;
+      margin: 20px 0;
+    }
+
+    /* Interactive Map */
+    #map {
+      height: 350px;
+      width: 100%;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    /* Weather Effects */
+    .rain, .snow, .wind {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .raindrop, .snowflake {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.6);
+      animation: fall 2s linear infinite;
+    }
+
+    .raindrop {
+      width: 2px;
+      height: 15px;
+      bottom: 100%;
+    }
+
+    .snowflake {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      bottom: 100%;
+      animation: fall 5s linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh);
+      }
+    }
+
+    .wind {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 10%;
+      background: rgba(255, 255, 255, 0.2);
+      z-index: 1000;
+      animation: moveclouds 3s linear infinite;
+      display: none;
+    }
+
+    @keyframes moveclouds {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .weather-details {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .right-col {
+        padding-left: 0;
+        margin-top: 15px;
+      }
+
+      .forecast-block {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .forecast-day {
+        width: 80%;
+      }
+
+      #clock {
+        position: static;
+        margin-top: 10px;
+      }
+
+      #language-switch {
+        position: static;
+        margin-bottom: 10px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1 id="header-title">Vrastama Portal</h1>
+    <div id="clock">Local Time: --:--:--</div>
+    <div id="language-switch">
+      <button onclick="switchLanguage('en')">English</button>
+      <button onclick="switchLanguage('gr')">Ελληνικά</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Weather Section -->
+    <div class="weather-container">
+      <div class="weather-details">
+        <!-- Left Column: Weather Icon and Main Temperature -->
+        <div class="left-col">
+          <div class="icon-block">
+            <img id="weather-icon" class="weather-icon" alt="Weather Icon">
+          </div>
+          <p id="vrastama-condition" class="weather-condition">Loading...</p>
+          <p id="vrastama-temperature" class="temp">Loading...</p>
+        </div>
+
+        <!-- Right Column: Additional Weather Info -->
+        <div class="right-col">
+          <p class="data-point"><strong id="feels-like-label">Feels Like: </strong><span id="feels-like">Loading...</span></p>
+          <p class="data-point"><strong id="humidity-label">Humidity: </strong><span id="humidity">Loading...</span></p>
+          <p class="data-point"><strong id="wind-speed-label">Wind Speed: </strong><span id="wind-speed">Loading...</span></p>
+        </div>
+      </div>
+
+      <!-- Weather Forecast Block -->
+      <div class="forecast-block" id="forecast">
+        <!-- Forecast days will be added dynamically here -->
+      </div>
+
+      <div id="error-message"></div> <!-- Error message display -->
+    </div>
+
+    <!-- Interactive Map (Collapsible) -->
+    <button class="collapsible">Interactive Map</button>
+    <div class="content">
+      <div id="map"></div>
+    </div>
+
+    <!-- Notifications Block (Collapsible) -->
+    <button class="collapsible">Notifications</button>
+    <div class="content">
+      <ul id="notifications-list">
+        <li>Upcoming Village Festival on October 15th</li>
+        <li>Village Clean-up Event on November 1st</li>
+        <li>Important Road Closure Announcement</li>
+      </ul>
+    </div>
+
+    <!-- Contact Form (Collapsible) -->
+    <button class="collapsible">Contact Community</button>
+    <div class="content">
+      <form id="contact-form">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Your Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="message">Your Message:</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+
+        <input type="submit" value="Send Message">
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    © 2024 Vrastama Portal. Powered by Matsioris D. Georgios. All rights reserved.
+  </footer>
+
+  <!-- Weather Effects -->
+  <div class="rain"></div>
+  <div class="snow"></div>
+  <div class="wind"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <script>
+    const apiKey = 'a14b6acd056531b654e38565bfea7ebe';  // Replace with your OpenWeather API key
+    let currentLanguage = 'en';  // Track the current language
+
+    // Initialize the Leaflet map with Vrastama's location
+    const map = L.map('map').setView([40.4715, 23.5312], 14); // Adjust zoom level as needed
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Add marker for Vrastama
+    const marker = L.marker([40.4715, 23.5312]).addTo(map)
+      .bindPopup('Βράσταμα Village Center')
+      .openPopup();
+
+    // Collapsible Sections Functionality
+    const collapsibles = document.getElementsByClassName("collapsible");
+    for (let i = 0; i < collapsibles.length; i++) {
+      collapsibles[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        const content = this.nextElementSibling;
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } 
+      });
+    }
+
+    // Fetch weather data
+    function getWeather() {
+      const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=Vrastama&appid=${apiKey}&units=metric&lang=${currentLanguage}`;
+      
+      fetch(weatherApiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          updateWeatherUI(data);
+        })
+        .catch(error => {
+          document.getElementById('error-message').textContent = `Error fetching weather data: ${error.message}`;
+        });
+    }
+
+    // Update Weather UI
+    function updateWeatherUI(data) {
+      document.getElementById('vrastama-temperature').textContent = `${Math.round(data.main.temp)}°C`;
+      document.getElementById('feels-like').textContent = `${Math.round(data.main.feels_like)}°C`;
+      document.getElementById('humidity').textContent = `${data.main.humidity}%`;
+      document.getElementById('wind-speed').textContent = `${data.wind.speed} m/s`;
+      document.getElementById('vrastama-condition').textContent = capitalizeFirstLetter(data.weather[0].description);
+      
+      // Update weather icon
+      const weatherCondition = data.weather[0].main;
+      document.getElementById('weather-icon').src = getWeatherIcon(weatherCondition);
+      document.getElementById('weather-icon').alt = data.weather[0].description;
+
+      // Fetch and display forecast
+      getWeatherForecast(data.coord.lat, data.coord.lon);
+      
+      // Update background based on time
+      updateBackground();
+
+      // Trigger weather effects
+      triggerWeatherEffect(weatherCondition);
+    }
+
+    // Fetch 3-day weather forecast
+    function getWeatherForecast(lat, lon) {
+      const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=${currentLanguage}`;
+      
+      fetch(forecastApiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          updateForecastUI(data);
+        })
+        .catch(error => {
+          document.getElementById('error-message').textContent = `Error fetching forecast data: ${error.message}`;
+        });
+    }
+
+    // Update Forecast UI
+    function updateForecastUI(data) {
+      const forecastDiv = document.getElementById('forecast');
+      forecastDiv.innerHTML = ''; // Clear previous forecast
+      
+      // OpenWeather forecast provides data every 3 hours; to get daily forecast, pick data at 12:00 PM each day
+      const dailyData = {};
+
+      data.list.forEach(entry => {
+        const date = new Date(entry.dt * 1000);
+        const day = date.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'el-GR', { weekday: 'long' });
+        const hour = date.getHours();
+        if (hour === 12 && !dailyData[day]) {
+          dailyData[day] = entry;
+        }
+      });
+
+      for (const day in dailyData) {
+        const forecast = dailyData[day];
+        const temp = `${Math.round(forecast.main.temp)}°C`;
+        const description = capitalizeFirstLetter(forecast.weather[0].description);
+        const condition = forecast.weather[0].main;
+        const icon = getWeatherIcon(condition);
+
+        const dayBlock = document.createElement('div');
+        dayBlock.classList.add('forecast-day');
+        dayBlock.innerHTML = `
+          <h4>${capitalizeFirstLetter(day)}</h4>
+          <img src="${icon}" alt="${description}">
+          <p>${temp}, ${description}</p>
+        `;
+        forecastDiv.appendChild(dayBlock);
+      }
+    }
+
+    // Capitalize first letter
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Get weather icon based on condition
+    function getWeatherIcon(condition) {
+      const icons = {
+        'Clear': 'sun.png',
+        'Clouds': 'cloud.png',
+        'Rain': 'rain.png',
+        'Drizzle': 'rain.png',
+        'Thunderstorm': 'thunderstorm.png',
+        'Snow': 'snow.png',
+        'Mist': 'fog.png',
+        'Smoke': 'fog.png',
+        'Haze': 'fog.png',
+        'Dust': 'fog.png',
+        'Fog': 'fog.png',
+        'Sand': 'fog.png',
+        'Ash': 'fog.png',
+        'Squall': 'wind.png',
+        'Tornado': 'wind.png'
+      };
+      return icons[condition] || 'default.png';
+    }
+
+    // Update background based on time of day
+    function updateBackground() {
+      const hour = new Date().getHours();
+      const body = document.body;
+      if (hour >= 18 || hour <= 6) {
+        body.style.backgroundImage = "url('vrastama5.jpg')"; // Nighttime
+      } else {
+        body.style.backgroundImage = "url('vrastama3.jpg')"; // Daytime
+      }
+    }
+
+    // Trigger weather effects
+    function triggerWeatherEffect(condition) {
+      // Clear existing effects
+      document.querySelector('.rain').innerHTML = '';
+      document.querySelector('.snow').innerHTML = '';
+      document.querySelector('.wind').style.display = 'none';
+
+      if (condition === 'Rain' || condition === 'Drizzle') {
+        for (let i = 0; i < 100; i++) {
+          const raindrop = document.createElement('div');
+          raindrop.classList.add('raindrop');
+          raindrop.style.left = Math.random() * 100 + 'vw';
+          raindrop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
+          document.querySelector('.rain').appendChild(raindrop);
+        }
+      } else if (condition === 'Snow') {
+        for (let i = 0; i < 50; i++) {
+          const snowflake = document.createElement('div');
+          snowflake.classList.add('snowflake');
+          snowflake.style.left = Math.random() * 100 + 'vw';
+          snowflake.style.animationDuration = 3 + Math.random() * 2 + 's';
+          snowflake.style.opacity = Math.random();
+          document.querySelector('.snow').appendChild(snowflake);
+        }
+      } else if (condition === 'Wind' || condition === 'Squall' || condition === 'Tornado') {
+        document.querySelector('.wind').style.display = 'block';
+      }
+    }
+
+    // Language Switching
+    function switchLanguage(language) {
+      currentLanguage = language;
+
+      if (language === 'en') {
+        document.getElementById('header-title').textContent = 'Vrastama Portal';
+        document.getElementById('feels-like-label').textContent = 'Feels Like: ';
+        document.getElementById('humidity-label').textContent = 'Humidity: ';
+        document.getElementById('wind-speed-label').textContent = 'Wind Speed: ';
+        document.querySelector('.collapsible:nth-of-type(2)').textContent = 'Notifications';
+        document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Contact Community';
+        // Update notifications and contact form labels if needed
+      } else if (language === 'gr') {
+        document.getElementById('header-title').textContent = 'Πύλη Βραστάμα';
+        document.getElementById('feels-like-label').textContent = 'Αισθάνεται σαν: ';
+        document.getElementById('humidity-label').textContent = 'Υγρασία: ';
+        document.getElementById('wind-speed-label').textContent = 'Ταχύτητα ανέμου: ';
+        document.querySelector('.collapsible:nth-of-type(2)').textContent = 'Ειδοποιήσεις';
+        document.querySelector('.collapsible:nth-of-type(3)').textContent = 'Επικοινωνία Κοινότητας';
+        // Update notifications and contact form labels if needed
+      }
+
+      // Refresh weather data in the selected language
+      getWeather();
+    }
+
+    // Update Clock
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = `Local Time: ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Handle Contact Form Submission
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (name && email && message) {
+        alert(`${currentLanguage === 'en' ? 'Message sent successfully!' : 'Το μήνυμα εστάλη με επιτυχία!'}`);
+        this.reset();
+      } else {
+        alert(`${currentLanguage === 'en' ? 'Please fill in all fields.' : 'Παρακαλώ συμπληρώστε όλα τα πεδία.'}`);
+      }
+    });
+
+    // Initialize
+    window.onload = function() {
+      getWeather();
+      updateClock();
+      setInterval(updateClock, 1000); // Update clock every second
+    };
+  </script>
+
+</body>
+</html>
